@@ -1,0 +1,78 @@
+Ch1. Docker 활용 소개
+
+https://github.com/DevOpsRunbook/FastCampus/tree/main/Appendix
+
+01. 강사 소개 및 인사
+
+02. Docker 활용 Orientation
+
+Docker CI/CD
+Jenkins를 활용한 CI/CD빌드 환경 구성
+Gradle을 활용한 개발코드 빌드
+Jib을 활용한 Docker 이미지 빌드
+AWS ECR에 Docker 이미지 Push 및 짱
+AWS EC2에 Docker 컨테이너 배포/기동
+
+CI - Continous Integration
+
+CD
+Continous Deployment
+운영 환경으로 배포시 사용자의 자동화를 통해 자동 배포하는가
+
+Continous Delivery
+운영 환경으로 배포시 사용자의 승인 과정을 거쳐 수동으로 배포하는가
+
+CI/CD - DevOps의 큰 축임
+코드
+개발자가 Git으로 커밋
+
+CI PIPELINE
+Git의 Source Code가 CI 도구를 통해 가져와 빌드로 통합함
+자동화 된 테스트는 빌드 중에 실행됨
+빌드된 버전의 패키지가 스테이징 및 운영 환경으로 전달됨
+
+CD PIPELINE
+
+
+Docker 개발 관리
+Nexus를 활용한 Artifact 관리
+코드 빌드시 artifact 적용 방법
+Sonarqube를 활용한 코드 품질 관리
+코드 빌드시 Sonarqube 적용 및 스캔 방법
+Calir 및 AWS ECR을 활용한 컨테이너 보안 스캔 수행
+Docker 컨테이너 보안 스캔 이후 취약점 조치 방법
+
+maven이나 gradle에서 널리 사용되는 open source artifact repository임
+private repositoru 사용 가능
+코드 공유 가능
+Helm, Docker 등도 지원
+
+외부에서 가지고 오는 artifact를 private nexus를 cache처럼 사용 가능
+
+개발팀에서 사용하는 공용 라이브러리를 프라이빗 넥서스에서 배포하여 공통 라이브러리처럼 사용 가능함
+
+프록시 역할
+보안 문제 등으로 외부 레포지토리에 접속 어렵거나 제한된 경우
+
+Sonarqube
+지속적인 코드 품질 향상 도구
+자동화된 정적 코드 분석 규칙으로 스캔
+다양한 개발 언어 지원
+CI/CD 도구와 통합 가능
+
+
+개발자가 코드 작성 후 sonarlint 사용하여 로컬 분석 진행
+
+jenkins와 같은 ci도구로 자동 빌드시 sonar scanner를 통해 코드 스캔이 진행됨
+
+
+Clair
+컨테이너 이미지 컨텐츠를 파싱하고 컨테츠의 보안에 영향을 미치는 취약점을 보고하는 시스템
+
+Docker 운영 관리
+Nexus Registry 및 AWS ECR 연동
+Docker Image Push/Pull 관리
+Docker Base Image 빌드 속도 향상을 위한 구성
+Docker Base Image 튜닝 및 업데이트 관리
+Docker 컨테이너 런타임 및 네트워크 트러블 슈팅 방법
+Private 환경에서 Nexus 및 Squid를 활용한 Docker 빌드 환경 구성 및 빌드 수행
