@@ -272,7 +272,7 @@ Nexus repository
 http://ec2-44-203-109-155.compute-1.amazonaws.com:8081/repository/test-docker-nexus-repository1/
 
 <aws ecr 로그인 명령어>
-aws ecr get-login-password --region us-east-1 | docker login --username  AWS --password-stdin 149749669439.dkr.ecr.us-east-1.amazonaws.com/test  (brew install awscli 설치해야 함)
+aws ecr get-login-password --region us-east-1 | docker login --username  AWS --password-stdin ############.dkr.ecr.us-east-1.amazonaws.com/test  (brew install awscli 설치해야 함)
 (aws configure)
 
  
@@ -296,8 +296,8 @@ https://hub.docker.com/_/mysql
 
 
 jenkins 계정
-!admin00
-admin@admin.com
+########
+#####@#####.com
 
 
 
