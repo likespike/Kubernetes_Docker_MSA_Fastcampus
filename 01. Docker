@@ -1,0 +1,398 @@
+Ch 01.파트 개요 및 실습 준비
+
+예제 코드 및 실습 코드
+https://github.com/tedilabs/fastcampus-devops
+
+https://github.com/DevOpsRunbook/FastCampus
+
+01. Docker 기초 파트 개요
+
+library 충돌
+
+격리 요구 - 가상화 기술
+
+가상머신
+Hypervisor라는 컴포넌트
+Guest OS
+
+컨테이너
+가상화 기술 중의 하나
+(경량화, 자원 오버헤드 줄임, 성능 향상 등)
+
+docker
+컨테이너 엔진 중의 하나 - 하나의 서버 위에서 컨테이너를 어떻게 관리할 수 있을까(관리 소프트웨어)
+OS 위에 docker engine 설치
+container는 호스트 입장에서는 process와 마찬가지임
++ 격리 기술(namespace 등)
+격리 기술이 들어간 프로세스 (=격리 프로세스)
+호스트 운영체제의 커널을 공용으로 사용
+다른 프로세스들로부터 격리된 것처럼 느껴지게 되는 기술들 적용
+
+
+Kubernetes (2014)
+Container Orchestration System 중의 하나이다
+여러 서버로 구성된 클러스터 환경에서 컨테이너들을 어떻게 더 잘 관리할 수 있을까?
+(클러스터 환경에서 컨테이너를 관리하는 기술, 소프트웨어)
+
+실습 준비
+쿠버네티스 학습까지 사용하려면 - minikube
+(구동을 위해 CPU 2 core 이상 / RAM 2GB 이상 필요) = aws ec2 t2.small 이상
+
+
+02. docker 및 docker-compose 설치 (Ubuntu)
+
+https://docs.docker.com/engine/install/ubuntu/ 
+
+패키지 목록 업데이트 및 필요 의존성 패키지 설치
+(apt-get 우분투 운영체제 패키지 매니저)
+sudo apt-get update
+sudo apt-get install \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+
+  apt-transport-https \
+(Debian 9 (stretch)과 그 이전 버전은 이것도 설치해야 함)
+
+Docker가 제공하는 GPG 공개키를 신뢰하도록 추가
+sudo mkdir -m 0755 -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+docker의 공식 apt repository 등록
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+패키지 목록 다시 갱신하여 docker repository에서 패키지 목록 가지고 옴 / docker cli 설치
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+ce는 community edition임, 무료버전의 엔진
+containerd.io 컨테이너 데몬 서비스
+
+Use Docker without root
+sudo usermod -aG docker $DOCKER_USER
+sudo usermod -aG docker ubuntu
+(aws ec2 vm의 기본 사용자가 ubuntu -> docker 사용자 그룹 안에 넣는 것)
+
+권한 추가했을 때 바로 적용은 안됨
+id - docker 그룹 목록에 docker 안보임
+Exit -> 다시 접속 -> id보면 숫자(docker)있음
+docker ps
+docker run hello-world
+
+docker-compose version
+
+업데이트
+Sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+(compose만 하려면) sudo apt-get install docker-compose-plugin
+
+
+03. docker 및 docker-compose 설치 (macOS)
+Docker for Desktop 프로그램 설치
+
+도커는 리눅스 컨테이너를 관리하는 기술
+윈도우, 맥 운영체제에서 도커를 사용할 수 있도록 추가적인 경량 가상화 기술을 사용
+데스크탑 GUI 제공
+
+Brew install --cask docker
+(GUI application이기 떄문에 --cask 옵션 사용)
+(지금은 그냥 dmg 파일 받아 실행하면 됨)
+
+
+04. kubectl과 kustomize 설치 (Ubuntu)
+
+kubectl
+kubernetes를 위한 command line tool
+Kubernetes cluster와 통신 가능
+
+https://kubernetes.io/docs/tasks/tools/
+
+패키지 목록 업데이트 및 kubernetes apt repository를 사용하기 위한 패지키 설치
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+
+(Debian 9 (stretch)과 그 이전 버전은 이것도 설치해야 함)
+sudo apt-get install -y apt-transport-https
+
+Google Cloud public signing key 다운로드
+sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+Kubernetes apt   추가
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+Kubernetes apt repository 관련 패키지 목록 업데이트 및 설치
+sudo apt-get update
+sudo apt-get install -y kubectl
+
+
+kustoimize 설치
+Kubenetes cluster가 application 정보들을 manifest 형태로 관리하는데, kubectl로는 굉장리 불편하기에 오픈소스 도구인 Kustomize나 Helm 사용한다 (Helm은 Chart로 manifest 관리함)
+인기가 많아서 kubectl 명령어에 kustomize가 내장되었다
+(Kubectl kustomize 해보면 나옴, 문법은 조금 다름)
+
+patch 혹은 overlay 방식으로 관리
+
+https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/
+
+binary file 다운
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+(root? directory에서 실행하면 에러 남)
+
+실행
+sudo install -o root -g root -m 0755 kustomize /usr/local/bin/kustomize
+
+
+
+05. kubectl과 kustomize 설치 (macOS)
+
+https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/
+
+brew install kubectl
+
+docker desktop 패키지 내에 kubectl 내장 버전도 있어서, 이렇게 설치하면 충돌 있을 수도 있음, 그러면
+brew link --overwrite kubernetes-cli
+
+Brew install kustomize
+
+
+06. minikube 설치 및 쿠버네티스 클러스터 구성 (Ubuntu)
+가상환경을 사용하여 쿠버네티스 클러스터를 구현
+driver를 선택하여 원하는 가상환경에서 구성 가능 (docker, podam, VirtualBox, parallels, vmware, hyperkit 등의 드라이버 제공) - 이번 실습에서는 docker container 위에 클러스터 구성할 것임
+쿠버네티스 학습환경으로 활용하기 좋음
+
+What you’ll need
+2 CPU
+2GB RAM
+20GB disk
+container or virtual machine manager
+
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+minikube
+
+minikube start --help
+
+minikube start--driver docker
+
+cat ~/.kube/config  
+(kubectl이 kubernetes cluster와 통신하기 위한 설정 파일임)
+clusters: (클러스터 정보)
+contexts: (=클러스터 인증 리스트)
+(어떤 클러스터와 통신을 할지 인증과 관련된 설정임, 어떤 cluster와 어떤 user로 접속하겠다)
+users: (인증 사용자 정보)
+
+Kubectl get nodes
+kubectl cluster-info
+minikube status
+minikube stop
+minikube delete
+minikube pause
+minikube unpause
+
+minikube addons list
+(dashboard heml-tiller ingress istio metallb metrics-server
+minikube addons enable [addon]
+minikube addons disable [addon]
+minikube ssh (쿠버네티스 클러스터 노드에 SSH 접속)
+minikube kubectl (쿠버네티스 클러스터 버전과 대응되는 kubectl 사용)
+
+
+07. minikube 설치 및 쿠버네티스 클러스터 구성 (macOS)
+
+brew install minikube
+
+
+
+08. 테라폼 코드를 이용하여 미리 준비된 AWS 실습환경 구성
+
+brew install terraform
+
+env/terraform-aws-ubuntu
+
+network 테라폼 워크 스케이스임
+ec2-instance 테라폼 워크스페이스임
+
+
+
+
+~/pems/jenkins/
+
+main.tf
+resource "aws_key_pair" “fastcampus” { # ec2-test라는 이름의 aws_key_pair라는 타입의 리소스를 정의한다.
+  key_name = “fastcampus” # 생성될 키페어의 이름
+  public_key = file(“~/pems/jenkins/ssh-key.pub") # 키페어에 사용할 public key 지정
+}
+
+
+아니면
+
+    connection {
+      type = "ssh"
+      user = "ubuntu"
+      host = aws_instance.demo.public_ip
+      private_key = file("~/pems/ec2vm/test-kp-common.pem")
+
+
+terraform init - 디렉토리를 다운로드 하면서 앞서 정의한 provider가 다운로드 및 세팅됨
+terraform fmt - 변경된 파일이 있다면 구성을 맞추기 위해 현재 디렉토리의 구성을 자동으로 업데이트
+terraform validate - 구성이 형식적으로 오류가 없는지 유효성을 검사
+terraform apply - 테라폼 인프라 배포
+
+
+
+
+
+
+
+
+cd ~/.ssh -> pem 위치할 곳
+
+ssh -i aws-key.pem ubuntu@ec2-18-232-168-101.compute-1.amazonaws.com
+ssh -i aws-key1.pem ubuntu@ec2-44-203-109-155.compute-1.amazonaws.com
+
+
+
+gradle init --dsl=groovy --type=java-application  \
+--test-framework=junit  \
+--package=com.test --project-name=test-docker-spring-boot 
+
+
+docker run --name jenkins -d -p 8080:8080 -v ~/jenkins:/var/jenkins_home -u root jenkins/jenkins:latest  
+\Nexus
+test / !test00
+
+docker run --name nexus -d -p 8081:8081 -v ~/nexus-data:/nexus-data -u root sonatype/nexus3  
+docker exec -it nexus bash -c "cat /nexus-data/admin.password"  
+
+
+Nexus repository
+http://ec2-44-203-109-155.compute-1.amazonaws.com:8081/repository/test-docker-nexus-repository1/
+
+<aws ecr 로그인 명령어>
+aws ecr get-login-password --region us-east-1 | docker login --username  AWS --password-stdin 149749669439.dkr.ecr.us-east-1.amazonaws.com/test  (brew install awscli 설치해야 함)
+(aws configure)
+
+ 
+
+
+
+
+Dockerfile
+이미지를 만들기 위해 이 파일에 이미지 생성 과정을 적음
+
+도커는 하나의 실행파일이지만 실제로 클라이언트와 서버역할을 각각 할 수 있음
+
+https://subicura.com/2017/02/10/docker-guide-for-beginners-create-image-and-deploy.html
+
+grafana - docker guide
+https://grafana.com/docs/grafana/latest/installation/docker/ 
+
+MySQL - docker dude
+https://hub.docker.com/_/mysql 
+
+
+
+jenkins 계정
+!admin00
+admin@admin.com
+
+
+
+git 기반의 쿠버네티스 관리
+ci도구 - 젠킨스
+cd도구 - Argo CD
+
+젠킨스
+자바런타임 위에서 동작하는 빌드, 테스트, 배포 등 모든 소프트웨어 개발 릴리즈 과정을 자동화해주는 워크플로우 도구
+
+
+
+kubectl
+kubenetes를 위한 command line tool
+(kubenetes cluster와 통신 가능)
+
+kustomize
+kubectl로 app관리하면 복잡
+양대산맥 - customize, helm
+
+shift+ctrl+v
+shift+ctrl+c
+
+chmod u+x install-kubectl.sh
+
+./
+
+
+
+<kustomize 설치>
+
+참조
+https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/
+
+다운로드 받기
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+
+인스톨
+sudo install -o root -g root -m 0755 kustomize /usr/local/bin/kustomize
+
+
+<minikube 설치 및 쿠버네티스 클러스터 구성>
+참조
+https://minikube.sigs.k8s.io/docs/start/
+
+minikube로 cluster 생성
+minikube start --driver docker
+
+설정파일
+cat ~/.kube/config  
+
+kubectl get nodes
+
+kubectl cluster-info
+
+기본명령어
+minikube status
+minikube stop / start
+minikube delete
+minikube pause / unpause
+
+추가명령어
+minikube addons list
+minikube addons enable / disable [addon]
+minikube ssh
+minikube kubectl …
+
+유명 에드온  
+dashboard
+helm-tiller
+ingress
+istio
+metallb
+metirics-server
+
+minikube kubectl
+
+<도커와 쿠버네티스를 이용한 서비스 운영>
+도커를 이용한 컨테이너 관리
+도커 구성요소
+컨테이너 - 격리 된 프로세스
+
+
+도커 이미지와 컨테이너
+
+
+
+도커 이미지 이름 구성
+
+
+
+도커 이미지 저장소
+
+<도커를 이용한 컨테이너 간리>
+
+
+
+ 
