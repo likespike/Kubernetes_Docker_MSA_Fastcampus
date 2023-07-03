@@ -1,0 +1,36 @@
+오류
+
+The connection to the server localhost:8080 was refused 오류 해결법
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+---
+
+0/1 nodes are available: 1 node(s) had taints that the pod didn't tolerate
+https://velog.io/@baeyuna97/해결-01-nodes-are-available-1-nodes-had-taints-that-the-pod-didnt-tolerate
+
+띄우고자하나는 pod에 taints가 있어 해당 파드에 띄울 수 없는 것이다.
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+
+토큰 유효 기간이 지나 join할 수 없는 경우
+kubeadm token list - 없으면 만료된 것
+kubeadm token create - token 값 알 수 있음
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+(hash 값 알 수 있음)
+
+
+
+2 Token 값
+qvi6nz.4c995i7uypi8wtjr
+
+3 hash 값
+f12964097277b48e46cd45beae2fa23941533907c8d74734c7629d45fdf9b2d9
+
+4 join
+kubeadm join <Kubernetes API Server:PORT> --token <2. Token 값> --discovery-token-ca-cert-hash sha256:<3. Hash 값>
+
+kubeadm join 34.64.93.80:6443 --token qvi6nz.4c995i7uypi8wtjr --discovery-token-ca-cert-hash sha256:f12964097277b48e46cd45beae2fa23941533907c8d74734c7629d45fdf9b2d9
+
+
