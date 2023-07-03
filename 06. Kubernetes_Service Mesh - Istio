@@ -1,0 +1,82 @@
+Service Mesh - Istio
+
+MSA를 효율적으로 구축하기 위해 필요
+어플리케이션 Layer와 별도의 플랫폼 Layer
+어플리케이션의 관찰가능성(Observability), 보안, 신뢰성(reliability) 기능 제공
+마이크크로 서비스간의  통신 관리
+네트워크 프록시를 사용하는 Sidecar 패턴(어플리케이션 관리 위해)
+
+구성
+Control Plane
+Data Plane (+Sidecar Proxy)
+
+MSA(Micro Service Architecture)
+하나의 서비스(Monolithic)가 다수의 서비스로 분할되어 개발되고 배포되는 아키덱처
+서비스별 개발과 배포 속도 단축
+http, gRPC 등을 이용해 서비스간 통신
+(통신만 되면 각각의 서비스가 자신에게 맞는) 언어, 데이터베이스 독립적인 서비스 개발
+
+Cloud Native
+컨테이너 이미지를 통한 서비스 개발
+자유로운 실행 환경, 빠른 배포
+컨테이너 관리 프로젝트(Kubernetes)
+
+Micro Service의 개발장벽
+비즈니스 로직 외에 추가 개발 오버헤드 발생
+각 서비스가 통신 모듈, 통신 보안, 통신 재시도, 모니터링 갖춰야 함
+
+Service Mesh(Proxy?)
+이러한 오버헤드를 해결하기 위해 등장
+마이크로 서비스의 비즈니스 로직을 제외한 다른 부분을 지원
+마이크로 서비스에게 비즈니스 로직만 담당하게 할 수 있는 것은 사이드카 패턴을 사용하기 때문임
+(사이드카 - 하나의 파드 안에 여러 컨테이너 실행 가능, 기존 어플리케이션 파드에 프록시 컨테이너 추가)
+(그러면 파드 안의 컨테이너 갯수가 2개씩 됨, 정확히는 2개 이상씩?)
+
+istiod가 control plane 역할 수행함
+
+Service Mesh의 역할
+컨테이너 파드 간
+트래픽 관리: 서비스 간 통신 관리 (서비스 자체 변경 없이) - 다양한 배포 전략 가능해짐
+서비스 관측: 모니터링, 트레이싱
+보안기능: 인증, 정책, TLS 암호화 (네트워크단에서)
+
+Service Mesh의 장점
+서비스와 플래폼 인프라와의 종속성 완화
+플랫폼 운영자는 안정적인 서비스 통신 연결 및 모니터링
+어플리케이션 개발자는 자신의 서비스 개발에만 집중
+MSA의 조직적 문제 해결
+
+Envoy proxy by Lyft
+
+<Istio 설치>
+Istioctl 설치
+(Istio 설치와 설정, 모니터링을 위한 명령어 제공)
+
+https://istio.io/latest/docs/setup/getting-started/
+
+강의 시점에 1.14는 호환성 문제가 있어서, 1.13.4로 설치할 것
+
+mkdir istio-installatiion
+cd istio-installation
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.16.2 TARGET_ARCH=x86_64 sh -
+
+(화면에 나옴, 체크할 것)
+export PATH="$PATH:/home/likespike/istio-installation/istio-1.13.4/bin"
+
+
+
+
+
+
+Canary 배포테스트
+
+
+
+Kiali
+Istio 모니터링 대쉬보드
+
+
+
+
+
+
