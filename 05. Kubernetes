@@ -1,0 +1,136 @@
+ArgoCD
+
+https://github.com/Jaesang/fastcampus_kubernetes/tree/main/kubernetes/hands-on
+
+<ArgoCD 설치>
+https://argo-cd.readthedocs.io/en/stable/getting_started/
+
+mkdir argocd
+cd argocd/
+
+kubectl create namespace argocd
+
+wget https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+아니면
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+kubectl apply -f install.yaml -n argocd
+
+kubectl get po -n argocd
+
+(namespace argoce를 dafault로 하던데? 어떻게?)
+(Context "kubernetes-admin@kubernetes" modified. Active namespace is "argocd")
+
+kubectl get svc
+
+외부 접속 위해 argocd-server의 type을  loadbalancer로 변경
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+
+kubectl get svc (-w)
+
+EXTERNAL-IP로 접속
+보안 사항은 건너 뛰자(실습이니까)
+
+admin 계정 정보 파악
+admin 정보 secret으로 제공해줌
+kubectl get svc
+kubectl get secret argocd-initial-admin-secret -o yaml
+echo <password>|base64 -d
+
+admin과 password 입력
+
+<애플리케이션 등록>
+ArgoCd를 통해 kubernetes에 어플리케이션을 GitOps로 적용
+
+CREATE APPLICATION
+
+fork해서 사용하기
+https://github.com/argoproj/argocd-example-apps/tree/master/guestbook
+
+Application Name: guestbook
+Project: default
+SYNC  POLICY: Manual
+AUTO-CREATE NAMESPACE에 체크
+
+SOURCE
+Repository URL: https://github.com/#########/argocd-example-apps이 되리 것인, 체크해 볼 것 (GIT)
+Revision: master (Branches)
+Path: guestbook
+
+DESTINATION
+Cluster URL: https://kubernetes.default.svc (URL)
+Namespace: guestbook
+
+CREATE
+OutOfSync가 나옴 - Sycn Policy가 Manual이니까(autoX)
+SYNC버튼 누름
+
+kubectl get po -n guestbook
+kubectl get svc -n guestbook
+
+<미리 배포된 애플리케이션을 변경하는 작업 테스트>
+애플리케이션이 바라보고 있는 git repository 변경해 주면 됨
+
+git clone https://github.com/likespike/argocd-example-apps
+
+vi guestbook/giestbook-ui-deployment.yaml
+replicas 3개로 조정
+
+vi guestbook/guestbook-ui-svc.yaml
+type을 Loadbalancer로 변경
+
+git diff
+
+master branch가 아닌 새로운 branch 만들어 pull request 보내는 방식으로 진행
+change-value라는 branch 만들기
+git checkout -b change-value
+git status
+git add guestbook/
+git commit -m "change variable"
+git push origin change-value
+
+알려준 url로 접속 - Open a pull request
+change-value라는 branch를 master로 PR을 날리는 것임
+대상(base repository)이 원본repo라 내 fork repository로 바꾼다
+likespike/argocd-example.apps
+
+Create pull request
+
+file changed 탭 있음
+관리자가 확인 후 이상 없으면 승인
+Merge pull request 클릭
+
+APP DETAILS - SYNC POLICY - EABLE AUTO-SYNC로 변경하기
+deployment pod 3개로 변경 확인
+service loadbalancer 확인
+
+kubectl get po -n geustbook
+kubectl get svc -n guestbook
+
+문제시 roll-back 할 것
+1git log이전 형태로 원복
+2ArgoCD에서 작업 가능
+
+<git log로 복원 실습>
+git checkout master - master branch로 전환
+git pull origin - 최신 master branch로 update
+
+log에서 취소할 commit값 선택
+git revert 붙여넣기
+
+gir log
+Revert "change variavle"  나옴
+
+확인
+vi guestbook/buestbook-ui-deployment.yaml
+vi guestbook/buestbook-ui-svc.yaml
+
+복원을 다시 master branch에 적용
+git push origin master
+
+
+
+
+
+
+
